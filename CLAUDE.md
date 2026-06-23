@@ -51,8 +51,9 @@ Monorepo via npm workspaces: `server`, `web`, `shared`.
 - **Invariant:** every middle cohort is full at `capacity`; only the two ends can be
   partial. A cohort hitting `count === 0` is removed — never persist `0`.
 - `capacity` is per-list and fixed. `total` is derived (`Σ count`), never stored.
-- `add 0` / `take 0` are valid no-ops → `200`. Negative / non-integer `count` or
-  `capacity` → `400`. Unknown list → `404`.
+- `count` and `capacity` must be integers `>= 1`; `0`, negative, or non-integer → `400`
+  (so `add 0` / `take 0` are rejected). `take` clamps to available (serve _up to_ N,
+  return `taken`). Unknown list → `404`.
 - Full model, algorithms, and edge cases: `docs/domain-design.md`.
 
 ## Test-driven development (required)
@@ -74,7 +75,8 @@ Everything here is **TDD**: write the failing test first, then the code to pass 
   tags; no manual `refetch()`.
 - **Validate at the boundary with Zod**; the domain assumes clean input.
 - **Persistence is atomic:** write `*.tmp` → rename; every mutation runs through the
-  per-id mutex via the store's `withList(id, fn)` helper and bumps `version`.
+  per-id mutex via the store's `withList(id, fn)` helper and bumps `version`. Writes are
+  skipped when a mutation changes nothing (no `version` bump).
 - Make minimal, focused changes. Formatting is automatic — a `PostToolUse` hook runs
   Prettier on each file you edit (`.claude/settings.json`).
 

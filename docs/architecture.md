@@ -84,7 +84,7 @@ sequenceDiagram
   UI->>Q: trigger add mutation
   Note over Q: optional optimistic patch
   Q->>API: POST /api/waiting-lists/:id/add { count: N }
-  API->>API: validate count (int ≥ 0)
+  API->>API: validate count (int ≥ 1)
   API->>S: mutate (acquire mutex → load)
   S->>D: add(list, N)
   D-->>S: next state (version + 1)
@@ -198,6 +198,9 @@ Full rules, field model, and edge cases: [`domain-design.md`](./domain-design.md
   per-id mutex (above) serializes writes, so no client-supplied expected-version
   check is required; accepting one (e.g. `If-Match`) is the seam for multi-process
   concurrency later.
+- **Persist on change only:** the store skips the atomic write when a mutation leaves
+  state unchanged (`version` not bumped) — e.g. `take` on an empty list. No-effect
+  operations cost a read but never a write.
 
 ## 8. Runtime & deployment
 

@@ -68,7 +68,7 @@ string. Return a new list with a server-assigned `id`, the given/defaulted `name
 
 ### add(list, n)
 
-1. Validate `n` is a non-negative integer. If `n === 0`, no-op.
+1. Validate `n` is a positive integer (`n >= 1`); reject otherwise (`0` included).
 2. **Top up the newest cohort** (`cohorts[0]`) if it exists and is partial:
    `fill = min(capacity - cohorts[0].count, n)`; add it; `n -= fill`.
 3. **Open new cohorts on the left** while `n > 0`:
@@ -80,7 +80,7 @@ Worked example — `Add 22` to `[6, 10]` (capacity 10): top up `6 → 10` (used 
 
 ### take(list, n)
 
-1. Validate `n` is a non-negative integer. If `n === 0`, return `{ taken: 0 }`.
+1. Validate `n` is a positive integer (`n >= 1`); reject otherwise (`0` included).
 2. While `n > 0` and cohorts remain: `last = cohorts[last]` (oldest);
    `d = min(last.count, n)`; `last.count -= d`; `n -= d`; `taken += d`;
    if `last.count === 0`, remove it.
@@ -97,17 +97,22 @@ drain `10 → 9` (taken 7) → `[8, 10, 9]`. ✔
 
 | Case                                     | Behavior                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------ |
-| `add 0`                                  | No-op; returns current state, `200`.                                           |
-| `take 0`                                 | No-op; `{ taken: 0 }`, `200`.                                                  |
+| `add 0`                                  | Rejected with `400` — `count` must be `>= 1`.                                  |
+| `take 0`                                 | Rejected with `400` — `count` must be `>= 1`.                                  |
+| `take` exactly total                     | Empties the list; `taken = total`; list becomes `[]`.                          |
 | `take` more than total                   | Drains everything; `taken = total`; list becomes `[]`.                         |
-| `take` / `add` on empty list             | `take` → `{ taken: 0 }`; `add` opens cohorts normally.                         |
+| `take` / `add` on empty list             | `take` (n>=1) → `{ taken: 0 }`, no write (no change); `add` opens cohorts.     |
 | `capacity = 1`                           | Fully supported: `add 3` → `[1, 1, 1]`; `take 1` → `[1, 1]`.                   |
 | Empty cohort after removal               | A cohort hitting `count === 0` is removed immediately; `0` is never persisted. |
-| Negative / non-integer `n` or `capacity` | Rejected with `400` at the API boundary.                                       |
+| `n` or `capacity` &lt; 1, or non-integer | Rejected with `400` at the API boundary.                                       |
 | Partial-then-full add                    | Top-up fills the left partial before opening new cohorts.                      |
 
-> `add 0` / `take 0` are treated as valid no-ops (`200`), not errors: the brief
-> specifies "add _any_ number" and "take _up to_ N", so zero is within range.
+> `add 0` / `take 0` are **rejected** with `400`, not treated as no-ops: a zero-count
+> operation has no effect, so we fail fast at the boundary instead of doing a wasted
+> round-trip (the UI also disables the button below 1). Over-take is different — `take`
+> _up to_ N serves what's available and returns `taken`, so asking for more than the
+> total is valid and clamps. A request that legitimately changes nothing (e.g. `take`
+> on an empty list) returns truthfully but **skips the disk write** (no `version` change).
 
 ## 5. Decision record — ordered array (deque) vs alternatives
 
