@@ -21,6 +21,10 @@ describe('create', () => {
     expect(list.version).toBe(1);
   });
 
+  it('defaults capacity to 10 when none is provided', () => {
+    expect(create(testDeps()).capacity).toBe(10);
+  });
+
   it('rejects a non-integer or < 1 capacity', () => {
     expect(() => create(testDeps(), { capacity: 0 })).toThrow(DomainError);
     expect(() => create(testDeps(), { capacity: 2.5 })).toThrow(DomainError);

@@ -75,8 +75,9 @@ Everything here is **TDD**: write the failing test first, then the code to pass 
   tags; no manual `refetch()`.
 - **Validate at the boundary with Zod**; the domain assumes clean input.
 - **Persistence is atomic:** write `*.tmp` → rename; every mutation runs through the
-  per-id mutex via the store's `withList(id, fn)` helper and bumps `version`. Writes are
-  skipped when a mutation changes nothing (no `version` bump).
+  per-id mutex via the store's `withList(id, fn)` helper. The **domain** (not the store)
+  bumps `version` when it produces a changed state; `withList` persists that state and
+  never bumps again. A no-op change returns the list unchanged → no write, no bump.
 - Make minimal, focused changes. Formatting is automatic — a `PostToolUse` hook runs
   Prettier on each file you edit (`.claude/settings.json`).
 
