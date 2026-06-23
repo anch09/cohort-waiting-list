@@ -9,7 +9,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
 | 1 · Shared contract   | ☑      | entities + DTOs in `shared/`; typecheck clean.                                                          |
 | 2 · Domain core (TDD) | ☑      | create/add/take/total + toState; reject 0-count, clamp over-take; 15 tests green.                       |
 | 3 · File store (TDD)  | ☑      | atomic write, per-id mutex, persist-on-change, `withList`; 8 store tests green.                         |
-| 4 · API (TDD)         | ☐      |                                                                                                         |
+| 4 · API (TDD)         | ☑      | Zod boundary, thin controllers, error mapping (400/404), Express 5; 31 server tests green.              |
 | 5 · Web data layer    | ☐      |                                                                                                         |
 | 6 · Web UI            | ☐      |                                                                                                         |
 | 7 · Wire-up & polish  | ☐      |                                                                                                         |
@@ -27,3 +27,5 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
   (create/add/take/total/toState/toSummary); 15 tests green; typecheck + lint clean.
 - 2026-06-23 — Phase 3 approved (`phase-3-file-store.md`) and implemented TDD: file store
   (atomic write, per-id mutex, persist-on-change, `withList`); 24 server tests green.
+- 2026-06-23 — Phase 4 approved (`phase-4-api.md`) and implemented TDD: REST API (Zod
+  schemas, controllers, routes, error mapping; Express 5 async-forwarding); 31 server tests green.
