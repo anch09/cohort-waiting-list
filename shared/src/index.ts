@@ -1,2 +1,2 @@
-// Placeholder — replaced by the Phase 1 shared contract (entities + DTOs).
-export {};
+export * from './entities';
+export * from './dto';

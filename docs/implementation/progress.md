@@ -6,7 +6,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
 | Phase                 | Status | Notes                                                                                                   |
 | --------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
 | 0 · Scaffold          | ☑      | workspaces + TS + ESLint/Prettier + Vitest; pinned exact versions (Express 5). install/test/lint clean. |
-| 1 · Shared contract   | ☐      |                                                                                                         |
+| 1 · Shared contract   | ☑      | entities + DTOs in `shared/`; typecheck clean.                                                          |
 | 2 · Domain core (TDD) | ☐      |                                                                                                         |
 | 3 · File store (TDD)  | ☐      |                                                                                                         |
 | 4 · API (TDD)         | ☐      |                                                                                                         |
@@ -19,3 +19,5 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
 - 2026-06-23 — Reset to proposal-first workflow; per-task proposals now live in `ai-sessions/`.
 - 2026-06-23 — Phase 0 approved (`phase-0-scaffold.md`) and implemented: monorepo scaffold,
   exact pinned versions (Express 5.2.1). `npm install`/`test`/`lint` all clean.
+- 2026-06-23 — Phase 1 approved (`phase-1-shared-contract.md`) and implemented: entities + DTOs
+  in `shared/`; typecheck + lint clean.
