@@ -167,7 +167,12 @@ export function WaitingListsView() {
                   label='Take'
                   submitLabel='Take'
                   onSubmit={handleTake}
-                  disabled={isTaking}
+                  disabled={isTaking || active.total === 0}
+                  note={
+                    active.total === 0
+                      ? 'Nothing waiting to take yet.'
+                      : `Up to ${active.total} available.`
+                  }
                 />
               </div>
               {served !== null && (

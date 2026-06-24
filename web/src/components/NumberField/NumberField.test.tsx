@@ -55,4 +55,31 @@ describe('NumberField', () => {
     expect(screen.getByLabelText('Add')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
   });
+
+  it('shows an informational note when there is no validation error', () => {
+    render(
+      <NumberField
+        label='Take'
+        submitLabel='Take'
+        onSubmit={vi.fn()}
+        note='Up to 18 available.'
+      />
+    );
+    expect(screen.getByText('Up to 18 available.')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('prefers the validation error over the note', async () => {
+    render(
+      <NumberField
+        label='Take'
+        submitLabel='Take'
+        onSubmit={vi.fn()}
+        note='Up to 18 available.'
+      />
+    );
+    await userEvent.type(screen.getByLabelText('Take'), '0');
+    expect(screen.getByRole('alert')).toHaveTextContent('Minimum is 1');
+    expect(screen.queryByText('Up to 18 available.')).toBeNull();
+  });
 });

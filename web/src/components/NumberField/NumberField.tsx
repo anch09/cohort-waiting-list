@@ -10,7 +10,8 @@ export function NumberField({
   submitLabel,
   onSubmit,
   min = 1,
-  disabled = false
+  disabled = false,
+  note
 }: NumberFieldProps) {
   const inputId = useId();
   const [value, setValue] = useState('');
@@ -54,14 +55,16 @@ export function NumberField({
           disabled={disabled}
           className='mt-1 w-24 rounded border border-slate-300 px-2 py-1'
         />
-        {error !== '' && (
+        {error !== '' ? (
           <span
             role='alert'
             className='mt-1 text-sm text-red-600'
           >
             {error}
           </span>
-        )}
+        ) : note ? (
+          <span className='mt-1 text-sm text-slate-500'>{note}</span>
+        ) : null}
       </div>
       <button
         type='submit'

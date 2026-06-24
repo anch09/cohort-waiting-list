@@ -139,6 +139,22 @@ describe('WaitingListsView', () => {
     expect(screen.getByTestId('cohorts-empty')).toBeInTheDocument();
   });
 
+  it('disables Take with a reason when the list is empty', async () => {
+    mockActiveList(emptyState);
+    render(<WaitingListsView />);
+    await selectCreators();
+    expect(screen.getByRole('button', { name: 'Take' })).toBeDisabled();
+    expect(screen.getByText('Nothing waiting to take yet.')).toBeInTheDocument();
+  });
+
+  it('hints how many are available to take', async () => {
+    render(<WaitingListsView />);
+    await selectCreators();
+    expect(screen.getByText('Up to 18 available.')).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Take'), '5');
+    expect(screen.getByRole('button', { name: 'Take' })).toBeEnabled();
+  });
+
   it('surfaces an error when a mutation fails', async () => {
     vi.mocked(useTakeCreatorsMutation).mockReturnValue(
       mutation(vi.fn(() => ({ unwrap: () => Promise.reject(new Error('boom')) })))
