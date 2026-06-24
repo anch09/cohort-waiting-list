@@ -66,7 +66,7 @@ Each one, and why:
   The core logic doesn't need it — it's there so the UI can show a cohort number, and for future
   reporting.
 
-Full per-rule detail: [`domain-design.md` §4](docs/domain-design.md).
+Full per-rule detail: [`domain-design.md` §4](docs/domain-design.md#4-edge-cases-explicitly-handled).
 
 ## TypeScript judgment
 
@@ -101,7 +101,7 @@ Types here prevent bugs — they're not decoration:
   are thin wrappers around it: a request comes in, the rules do the work, and one small helper
   loads the list, applies the change, and saves it. So the rules are easy to test on their own,
   and the storage could be swapped (say, for a database) without touching them. Layout +
-  rationale: [`architecture.md` §9](docs/architecture.md).
+  rationale: [`architecture.md` §9](docs/architecture.md#9-repository-structure).
 
 - **Tests written first, all the way through:** `npm test` runs **56** of them (34 on the server,
   22 on the web). The tricky persistence guarantees are tested directly — that a save never leaves
@@ -118,7 +118,7 @@ Types here prevent bugs — they're not decoration:
   never saved, and edits to the same list are handled one at a time, so two requests can't
   overwrite each other.
 - **Future work:** durable storage (a database), an audit log, live updates, serving the app on a
-  single port, and editable capacity — sketched in [`architecture.md` §10](docs/architecture.md).
+  single port, and editable capacity — sketched in [`architecture.md` §10](docs/architecture.md#10-scope--future-work).
 
 ## AI usage
 
