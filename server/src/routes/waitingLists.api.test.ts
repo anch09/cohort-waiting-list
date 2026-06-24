@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../app';
 import { createFileStore } from '../store/fileStore';
 import type { Express } from 'express';
@@ -84,5 +84,27 @@ describe('waiting lists API', () => {
   it('returns 404 for an unknown list', async () => {
     expect((await request(app).get('/api/waiting-lists/nope')).status).toBe(404);
     expect((await addTo('nope', 1)).status).toBe(404);
+  });
+
+  it('responds ok on the health check', async () => {
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true });
+  });
+
+  it('returns 404 for an unmatched route', async () => {
+    const res = await request(app).get('/not-a-real-route');
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: 'not found' });
+  });
+
+  it('maps an unexpected error to 500', async () => {
+    const broken = createFileStore(dir);
+    broken.enumerate = () => Promise.reject(new Error('disk fail'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const res = await request(createApp(broken)).get('/api/waiting-lists');
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: 'internal error' });
   });
 });

@@ -103,7 +103,7 @@ Types here prevent bugs — they're not decoration:
   and the storage could be swapped (say, for a database) without touching them. Layout +
   rationale: [`architecture.md` §9](docs/architecture.md).
 
-- **Tests written first, all the way through:** `npm test` runs **53** of them (31 on the server,
+- **Tests written first, all the way through:** `npm test` runs **56** of them (34 on the server,
   22 on the web). The tricky persistence guarantees are tested directly — that a save never leaves
   a half-written file behind, and that 50 saves happening at once don't lose any updates.
 
