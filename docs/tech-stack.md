@@ -21,6 +21,7 @@ flowchart TB
     react["React"]
     vite["Vite"]
     rtk["Redux Toolkit + RTK Query"]
+    tw["Tailwind CSS"]
   end
   subgraph QA["Quality & tooling"]
     vitest["Vitest"]
@@ -55,17 +56,17 @@ flowchart TB
 
 ## Frontend
 
-| Library                       | Purpose                                                                       | Rationale                                                    | Alternative considered                                                            |
-| ----------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| **React**                     | UI rendering.                                                                 | Standard and pairs with RTK Query.                           | Svelte/Vue — viable, but RTK Query integrates with React.                         |
-| **Vite**                      | Dev server (HMR) and production build.                                        | Fast startup, simple `/api` proxy, minimal config.           | CRA (deprecated); Next.js (SSR/routing not required).                             |
-| **Redux Toolkit + RTK Query** | Server-state cache, mutations, tag invalidation, optional optimistic updates. | Provides cache invalidation and refetching with little code. | TanStack Query (capable, not Redux-based); plain Redux thunks (more boilerplate). |
+| Library                       | Purpose                                                                                            | Rationale                                                    | Alternative considered                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| **React**                     | UI rendering.                                                                                      | Standard and pairs with RTK Query.                           | Svelte/Vue — viable, but RTK Query integrates with React.                         |
+| **Vite**                      | Dev server (HMR) and production build.                                                             | Fast startup, simple `/api` proxy, minimal config.           | CRA (deprecated); Next.js (SSR/routing not required).                             |
+| **Redux Toolkit + RTK Query** | Server-state cache, mutations, and tag invalidation (invalidation refetch, no optimistic updates). | Provides cache invalidation and refetching with little code. | TanStack Query (capable, not Redux-based); plain Redux thunks (more boilerplate). |
 
 ## Styling
 
-| Choice                                          | Purpose                                    | Rationale                                                                                                |
-| ----------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **Plain CSS / CSS Modules** (Tailwind optional) | Lay out cohort boxes, total, and controls. | Visual polish is not graded; styling is kept light. Tailwind is a drop-in if faster iteration is wanted. |
+| Choice                                        | Purpose                                    | Rationale                                                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tailwind CSS v4** (via `@tailwindcss/vite`) | Lay out cohort boxes, total, and controls. | Utility classes with near-zero config — one Vite plugin and a single `@import "tailwindcss"`. Visual polish isn't graded, so the layout stays light. (Plain CSS would also do.) |
 
 ## Quality & tooling
 
@@ -97,5 +98,7 @@ flowchart TB
 
 ## Versions
 
-Exact versions are pinned at scaffold time (latest stable of each). This document
-records the choices; the lockfile is the source of truth for versions.
+Dependencies are pinned to **exact** versions (no semver ranges), each the latest stable at
+build time: TypeScript 6, Node LTS, Express 5, Zod 4, nanoid 5; React 19, Vite 8, Redux
+Toolkit 2, Tailwind 4; Vitest 4, Supertest 7, React Testing Library 16. The lockfile is the
+source of truth.

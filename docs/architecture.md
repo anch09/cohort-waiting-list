@@ -56,14 +56,14 @@ flowchart LR
   classDef store fill:#efe,stroke:#8a8;
 ```
 
-| Component         | Responsibility                                                                                                                                                                                                  | Depends on                       |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| **UI components** | List/select/create lists; render the active list's cohorts, total, and controls; dispatch mutations.                                                                                                            | RTK Query hooks only.            |
-| **RTK Query**     | Server-state cache. Query endpoints **provide** tags; mutations **invalidate** them on success, which auto-refetches affected queries and updates the cache. Optional optimistic patching for instant feedback. | REST endpoints, response shapes. |
-| **REST routes**   | HTTP boundary: parse and validate input, map results and errors to status codes.                                                                                                                                | Domain core, file store.         |
-| **Domain core**   | The rules: create/add/take/total. Pure, no IO.                                                                                                                                                                  | Plain data only.                 |
-| **File store**    | Enumerate, load, and save lists; serialize mutations (mutex); atomic writes; `version` bump.                                                                                                                    | Filesystem, domain core.         |
-| **`data/*.json`** | Durable state, one file per list (`<id>.json`).                                                                                                                                                                 | —                                |
+| Component         | Responsibility                                                                                                                                                                                           | Depends on                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **UI components** | List/select/create lists; render the active list's cohorts, total, and controls; dispatch mutations.                                                                                                     | RTK Query hooks only.            |
+| **RTK Query**     | Server-state cache. Query endpoints **provide** tags; mutations **invalidate** them on success, which auto-refetches affected queries and updates the cache. Invalidation-only — no optimistic patching. | REST endpoints, response shapes. |
+| **REST routes**   | HTTP boundary: parse and validate input, map results and errors to status codes.                                                                                                                         | Domain core, file store.         |
+| **Domain core**   | The rules: create/add/take/total. Pure, no IO.                                                                                                                                                           | Plain data only.                 |
+| **File store**    | Enumerate, load, and save lists; serialize mutations (mutex); atomic writes; `version` bump.                                                                                                             | Filesystem, domain core.         |
+| **`data/*.json`** | Durable state, one file per list (`<id>.json`).                                                                                                                                                          | —                                |
 
 All mutations go through `store.withList(id, fn)`: the store loads the list, applies
 the pure domain function, and atomically saves. Reads load via the store; `total` is
@@ -81,9 +81,7 @@ sequenceDiagram
   participant S as File store
 
   U->>UI: Add N creators (active list)
-  UI->>Q: trigger add mutation
-  Note over Q: optional optimistic patch
-  Q->>API: POST /api/waiting-lists/:id/add { count: N }
+  UI->>Q: trigger add mutation  Q->>API: POST /api/waiting-lists/:id/add { count: N }
   API->>API: validate count (int ≥ 1)
   API->>S: mutate (acquire mutex → load)
   S->>D: add(list, N)
@@ -110,9 +108,7 @@ sequenceDiagram
   participant S as File store
 
   U->>UI: Take N creators (active list)
-  UI->>Q: trigger take mutation
-  Note over Q: optional optimistic patch
-  Q->>API: POST /api/waiting-lists/:id/take { count: N }
+  UI->>Q: trigger take mutation  Q->>API: POST /api/waiting-lists/:id/take { count: N }
   API->>S: mutate (mutex → load)
   S->>D: take(list, N)
   D-->>S: { state, taken } (taken = min(N, total))
@@ -142,9 +138,9 @@ and a **per-list tag** for an individual list's state.
 - **Invalidation triggers an automatic refetch.** RTK Query marks the affected
   queries stale, refetches them, and writes fresh server state into the cache.
   Components subscribed via hooks re-render automatically — no manual `refetch()`.
-- **Optional optimistic update.** A mutation may apply an `onQueryStarted`
-  optimistic patch for instant feedback; on failure the patch rolls back. The
-  invalidation refetch remains the source of truth either way.
+- **Optimistic updates: not used.** The implementation relies on invalidation + refetch
+  only (per CLAUDE.md). An `onQueryStarted` optimistic patch is a possible enhancement, but
+  it adds rollback complexity for little gain against a fast local API.
 
 ```mermaid
 flowchart LR
@@ -206,23 +202,23 @@ Full rules, field model, and edge cases: [`domain-design.md`](./domain-design.md
 
 ```mermaid
 flowchart LR
-  subgraph dev["Dev"]
-    vite["Vite dev server<br/>(HMR, proxy /api)"]
-    node1["Node · Express<br/>(tsx watch)"]
-    vite -->|proxy| node1
+  subgraph run["Run · npm run dev"]
+    vite["Vite dev server :5173<br/>(HMR, proxy /api)"]
+    node1["Node · Express :3000<br/>(tsx watch, API only)"]
+    vite -->|"proxy /api"| node1
   end
-  subgraph prod["Prod / demo"]
-    static["Static SPA build<br/>(served by Express or any static host)"]
-    node2["Node · Express + data/"]
-    static --> node2
-  end
+  fs[("data/*.json")]
+  node1 --> fs
 ```
 
-- **Dev:** two processes (Vite and Express) run together; Vite proxies `/api`.
-- **Prod/demo:** `vite build` produces static assets; Express serves them and the
-  API from one process, reading and writing `data/`.
-- The app tier is stateless apart from the `data/` folder; persist that folder to
-  retain state across restarts.
+- **How it runs:** `npm run dev` starts two processes — Vite (web) and Express (API) —
+  with Vite proxying `/api` to Express; open the Vite URL. Express is **API-only**; the
+  SPA is served by Vite.
+- **Production serving is out of scope (dev-only).** `vite build` produces the static SPA,
+  but serving it isn't wired up — a real deploy would host the build on any static host and
+  run Express separately, or add single-port serving to Express later (see §10).
+- The app tier is stateless apart from the `data/` folder; persist that folder to retain
+  state across restarts.
 
 ## 9. Repository structure
 
@@ -259,8 +255,9 @@ schemas/                 Zod request schemas + inferred types
 routes/                  Express Router per resource + mount under /api, health, 404
   waitingLists.routes.ts
   index.ts
-middleware/              cross-cutting: error handler, request logging
+middleware/              cross-cutting: central error handler, 404 handler
   errorHandler.ts
+  notFound.ts
 app.ts                   build the Express app (middleware + routes) — no listen
 index.ts                 bootstrap: create app, listen on PORT
 ```
@@ -335,6 +332,8 @@ web UI. Everything below is a deliberate scoping choice.
   concurrency grows (not a different data structure).
 - **Audit log** — append-only record of add/take/create.
 - **Push updates** — WebSockets/SSE instead of refetch-on-invalidate.
+- **Single-port serving** — Express serving the built SPA alongside the API (today the SPA
+  runs under Vite; running is dev-only).
 - **Editable capacity** — would snapshot `capacity` onto each cohort at open time, so
   a change applies only to new cohorts and can't break existing ones. Deferred: the
   brief calls capacity _fixed_.
