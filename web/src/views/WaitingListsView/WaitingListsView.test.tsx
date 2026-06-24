@@ -120,6 +120,17 @@ describe('WaitingListsView', () => {
     expect(createTrigger).not.toHaveBeenCalled();
   });
 
+  it('treats a blank capacity as the default (10) and hints it', async () => {
+    render(<WaitingListsView />);
+    const capacity = screen.getByLabelText('Capacity');
+    await userEvent.clear(capacity);
+    expect(capacity).toHaveAttribute('placeholder', 'Defaults to 10');
+    expect(screen.queryByText('Capacity must be a whole number ≥ 1')).toBeNull();
+    await userEvent.type(screen.getByLabelText('List name'), 'New');
+    await userEvent.click(screen.getByRole('button', { name: 'Create list' }));
+    expect(createTrigger).toHaveBeenCalledWith({ name: 'New', capacity: undefined });
+  });
+
   it('shows an empty placeholder for a list with no cohorts', async () => {
     mockActiveList(emptyState);
     render(<WaitingListsView />);

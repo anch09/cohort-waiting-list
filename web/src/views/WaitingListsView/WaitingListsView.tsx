@@ -23,9 +23,12 @@ export function WaitingListsView() {
   const [addCreators, { isLoading: isAdding }] = useAddCreatorsMutation();
   const [takeCreators, { isLoading: isTaking }] = useTakeCreatorsMutation();
 
-  // Capacity is validated in the form (integer >= 1) so we never send a value the API rejects.
+  // Capacity is optional: blank → omit it and let the server default to 10. A non-blank value
+  // must be a whole number >= 1, so we never send something the API rejects.
   const capacityTrimmed = capacity.trim();
-  const capacityValid = /^\d+$/.test(capacityTrimmed) && Number.parseInt(capacityTrimmed, 10) >= 1;
+  const capacityBlank = capacityTrimmed === '';
+  const capacityValid =
+    capacityBlank || (/^\d+$/.test(capacityTrimmed) && Number.parseInt(capacityTrimmed, 10) >= 1);
   const capacityError = capacityValid ? '' : 'Capacity must be a whole number ≥ 1';
 
   function select(id: string) {
@@ -40,7 +43,7 @@ export function WaitingListsView() {
     try {
       const created = await createList({
         name: name.trim() || undefined,
-        capacity: Number.parseInt(capacityTrimmed, 10)
+        capacity: capacityBlank ? undefined : Number.parseInt(capacityTrimmed, 10)
       }).unwrap();
       setName('');
       select(created.id);
@@ -118,6 +121,7 @@ export function WaitingListsView() {
               inputMode='numeric'
               value={capacity}
               onChange={event => setCapacity(event.target.value)}
+              placeholder='Defaults to 10'
               aria-invalid={!capacityValid}
               className='w-full rounded border border-slate-300 px-2 py-1'
             />
