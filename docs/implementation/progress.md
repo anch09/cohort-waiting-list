@@ -3,16 +3,16 @@
 Live status of [`tasks.md`](./tasks.md). Update as phases move.
 Legend: ☐ todo · ◐ in progress · ☑ done.
 
-| Phase                 | Status | Notes                                                                                                   |
-| --------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| 0 · Scaffold          | ☑      | workspaces + TS + ESLint/Prettier + Vitest; pinned exact versions (Express 5). install/test/lint clean. |
-| 1 · Shared contract   | ☑      | entities + DTOs in `shared/`; typecheck clean.                                                          |
-| 2 · Domain core (TDD) | ☑      | create/add/take/total + toState; reject 0-count, clamp over-take; 15 tests green.                       |
-| 3 · File store (TDD)  | ☑      | atomic write, per-id mutex, persist-on-change, `withList`; 8 store tests green.                         |
-| 4 · API (TDD)         | ☑      | Zod boundary, thin controllers, error mapping (400/404), Express 5; 31 server tests green.              |
-| 5 · Web data layer    | ☑      | RTK Query baseApi + waitingLists endpoints (tag invalidation per architecture §5).                      |
-| 6 · Web UI            | ☑      | Tailwind v4; CohortBar / NumberField / WaitingListsView; 9 web tests green (RTL, no MSW).               |
-| 7 · Wire-up & polish  | ☐      |                                                                                                         |
+| Phase                 | Status | Notes                                                                                                        |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| 0 · Scaffold          | ☑      | workspaces + TS + ESLint/Prettier + Vitest; pinned exact versions (Express 5). install/test/lint clean.      |
+| 1 · Shared contract   | ☑      | entities + DTOs in `shared/`; typecheck clean.                                                               |
+| 2 · Domain core (TDD) | ☑      | create/add/take/total + toState; reject 0-count, clamp over-take; 15 tests green.                            |
+| 3 · File store (TDD)  | ☑      | atomic write, per-id mutex, persist-on-change, `withList`; 8 store tests green.                              |
+| 4 · API (TDD)         | ☑      | Zod boundary, thin controllers, error mapping (400/404), Express 5; 31 server tests green.                   |
+| 5 · Web data layer    | ☑      | RTK Query baseApi + waitingLists endpoints (tag invalidation per architecture §5).                           |
+| 6 · Web UI            | ☑      | Tailwind v4; CohortBar / NumberField / view; capacity/validation, error banners, take-confirm; 22 web tests. |
+| 7 · Wire-up & polish  | ☑      | `npm run dev` (Vite + Express proxy); README; live HTTP smoke test writes `data/*.json`. Dev-only run.       |
 
 ## Log
 
@@ -31,4 +31,9 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
   schemas, controllers, routes, error mapping; Express 5 async-forwarding); 31 server tests green.
 - 2026-06-23 — Phases 5–6 approved (`phase-5-6-frontend.md`) and implemented: RTK Query data
   layer (baseApi + tag-invalidation endpoints) and UI (Tailwind v4; CohortBar / NumberField /
-  WaitingListsView). 9 web tests green (RTL, no MSW); web typecheck + build + lint clean.
+  WaitingListsView). RTL, no MSW; web typecheck + build + lint clean.
+- 2026-06-23 — UX hardening: capacity validation (blank → "Defaults to 10"), mutation error
+  banners, Take blocked on empty list + availability hint, inline confirm before over-take,
+  aligned Add/Take rows. 22 web tests green.
+- 2026-06-23 — Phase 7 approved (`phase-7-wireup.md`, dev-only) and implemented: README + live
+  HTTP smoke test (brief flow over the wire, `data/*.json` written). Full suite 53 tests green.
