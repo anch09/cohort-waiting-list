@@ -169,7 +169,7 @@ export function WaitingListsView() {
                 cohorts={active.cohorts}
                 capacity={active.capacity}
               />
-              <div className='mt-6 flex gap-8'>
+              <div className='mt-6 flex items-start gap-8'>
                 <NumberField
                   label='Add'
                   submitLabel='Add'

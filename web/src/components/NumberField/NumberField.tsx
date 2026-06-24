@@ -37,42 +37,46 @@ export function NumberField({
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex items-end gap-2'
+      className='flex flex-col gap-1'
     >
-      <div className='flex flex-col'>
-        <label
-          htmlFor={inputId}
-          className='text-sm font-medium text-slate-700'
-        >
-          {label}
-        </label>
-        <input
-          id={inputId}
-          inputMode='numeric'
-          value={value}
-          onChange={event => setValue(event.target.value)}
-          aria-invalid={error !== ''}
-          disabled={disabled}
-          className='mt-1 w-24 rounded border border-slate-300 px-2 py-1'
-        />
-        {error !== '' ? (
-          <span
-            role='alert'
-            className='mt-1 text-sm text-red-600'
+      {/* Label + input + button share one aligned row; the message hangs below it so the
+          row stays at the same height whether or not a note/error is present. */}
+      <div className='flex items-end gap-2'>
+        <div className='flex flex-col'>
+          <label
+            htmlFor={inputId}
+            className='text-sm font-medium text-slate-700'
           >
-            {error}
-          </span>
-        ) : note ? (
-          <span className='mt-1 text-sm text-slate-500'>{note}</span>
-        ) : null}
+            {label}
+          </label>
+          <input
+            id={inputId}
+            inputMode='numeric'
+            value={value}
+            onChange={event => setValue(event.target.value)}
+            aria-invalid={error !== ''}
+            disabled={disabled}
+            className='mt-1 w-24 rounded border border-slate-300 px-2 py-1'
+          />
+        </div>
+        <button
+          type='submit'
+          disabled={!valid || disabled}
+          className='rounded bg-slate-900 px-3 py-1.5 text-white disabled:opacity-40'
+        >
+          {submitLabel}
+        </button>
       </div>
-      <button
-        type='submit'
-        disabled={!valid || disabled}
-        className='rounded bg-slate-900 px-3 py-1.5 text-white disabled:opacity-40'
-      >
-        {submitLabel}
-      </button>
+      {error !== '' ? (
+        <span
+          role='alert'
+          className='text-sm text-red-600'
+        >
+          {error}
+        </span>
+      ) : note ? (
+        <span className='text-sm text-slate-500'>{note}</span>
+      ) : null}
     </form>
   );
 }
