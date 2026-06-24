@@ -86,5 +86,14 @@ Everything here is **TDD**: write the failing test first, then the code to pass 
 Plan before building: `/propose <task>` → `/refine <feedback>` → implement on approval.
 Proposals are written to `ai-sessions/`.
 
+**Ground every proposal in the design docs first** — read the relevant parts of
+`architecture.md`, `tech-stack.md`, and `domain-design.md`, cite the sections it builds on,
+and **flag any conflict instead of silently diverging** (the docs are the source of truth;
+update them in the same change if a decision genuinely needs to move).
+
+**Don't assume on anything that changes the design or is hard to reverse — ask.** State the
+assumptions you do make and your confidence; reach **≥ 0.95** before implementing. For
+trivial, reversible choices, pick a sensible default and note it rather than blocking.
+
 Track implementation in `docs/implementation/`: `tasks.md` (the step-by-step build
 plan) and `progress.md` (status log). Update `progress.md` as phases complete.
