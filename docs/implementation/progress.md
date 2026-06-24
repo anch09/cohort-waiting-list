@@ -10,8 +10,8 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
 | 2 · Domain core (TDD) | ☑      | create/add/take/total + toState; reject 0-count, clamp over-take; 15 tests green.                       |
 | 3 · File store (TDD)  | ☑      | atomic write, per-id mutex, persist-on-change, `withList`; 8 store tests green.                         |
 | 4 · API (TDD)         | ☑      | Zod boundary, thin controllers, error mapping (400/404), Express 5; 31 server tests green.              |
-| 5 · Web data layer    | ☐      |                                                                                                         |
-| 6 · Web UI            | ☐      |                                                                                                         |
+| 5 · Web data layer    | ☑      | RTK Query baseApi + waitingLists endpoints (tag invalidation per architecture §5).                      |
+| 6 · Web UI            | ☑      | Tailwind v4; CohortBar / NumberField / WaitingListsView; 9 web tests green (RTL, no MSW).               |
 | 7 · Wire-up & polish  | ☐      |                                                                                                         |
 
 ## Log
@@ -29,3 +29,6 @@ Legend: ☐ todo · ◐ in progress · ☑ done.
   (atomic write, per-id mutex, persist-on-change, `withList`); 24 server tests green.
 - 2026-06-23 — Phase 4 approved (`phase-4-api.md`) and implemented TDD: REST API (Zod
   schemas, controllers, routes, error mapping; Express 5 async-forwarding); 31 server tests green.
+- 2026-06-23 — Phases 5–6 approved (`phase-5-6-frontend.md`) and implemented: RTK Query data
+  layer (baseApi + tag-invalidation endpoints) and UI (Tailwind v4; CohortBar / NumberField /
+  WaitingListsView). 9 web tests green (RTL, no MSW); web typecheck + build + lint clean.
