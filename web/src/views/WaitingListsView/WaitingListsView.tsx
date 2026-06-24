@@ -14,6 +14,7 @@ export function WaitingListsView() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [served, setServed] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingTake, setPendingTake] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [capacity, setCapacity] = useState('10');
 
@@ -35,6 +36,7 @@ export function WaitingListsView() {
     setActiveId(id);
     setServed(null);
     setActionError(null);
+    setPendingTake(null);
   }
 
   async function handleCreate(event: FormEvent) {
@@ -63,8 +65,19 @@ export function WaitingListsView() {
     }
   }
 
-  async function handleTake(count: number) {
+  // Taking more than the total clamps server-side — confirm first so it isn't a surprise.
+  function handleTake(count: number) {
     if (activeId === null) return;
+    if (active && count > active.total) {
+      setPendingTake(count);
+      return;
+    }
+    void doTake(count);
+  }
+
+  async function doTake(count: number) {
+    if (activeId === null) return;
+    setPendingTake(null);
     try {
       const result = await takeCreators({ id: activeId, count }).unwrap();
       setServed(result.taken);
@@ -175,6 +188,30 @@ export function WaitingListsView() {
                   }
                 />
               </div>
+              {pendingTake !== null && (
+                <div className='mt-4 rounded border border-amber-300 bg-amber-50 p-3'>
+                  <p className='text-amber-800'>
+                    You're taking {pendingTake}, but only {active.total} are waiting. This will take
+                    all {active.total}.
+                  </p>
+                  <div className='mt-2 flex gap-2'>
+                    <button
+                      type='button'
+                      onClick={() => void doTake(pendingTake)}
+                      className='rounded bg-slate-900 px-3 py-1.5 text-white'
+                    >
+                      Take all {active.total}
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setPendingTake(null)}
+                      className='rounded border border-slate-300 px-3 py-1.5'
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
               {served !== null && (
                 <p
                   role='status'

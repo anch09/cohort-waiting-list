@@ -84,19 +84,40 @@ describe('WaitingListsView', () => {
     expect(addTrigger).toHaveBeenCalledWith({ id: 'l1', count: 3 });
   });
 
-  it('reports the server-reported served count, even when fewer than requested (over-take)', async () => {
-    vi.mocked(useTakeCreatorsMutation).mockReturnValue(
-      mutation(
-        vi.fn(() => ({
-          unwrap: () => Promise.resolve<TakeResponse>({ taken: 10, state: emptyState })
-        }))
-      )
-    );
+  it('takes directly without confirming when within the total', async () => {
+    render(<WaitingListsView />);
+    await selectCreators();
+    await userEvent.type(screen.getByLabelText('Take'), '5');
+    await userEvent.click(screen.getByRole('button', { name: 'Take' }));
+    expect(takeTrigger).toHaveBeenCalledWith({ id: 'l1', count: 5 });
+    expect(screen.queryByText(/are waiting\. This will take all/)).toBeNull();
+  });
+
+  it('confirms before over-taking, then fires and reports the served count', async () => {
+    const overTake = vi.fn(() => ({
+      unwrap: () => Promise.resolve<TakeResponse>({ taken: 18, state: emptyState })
+    }));
+    vi.mocked(useTakeCreatorsMutation).mockReturnValue(mutation(overTake));
     render(<WaitingListsView />);
     await selectCreators();
     await userEvent.type(screen.getByLabelText('Take'), '99');
     await userEvent.click(screen.getByRole('button', { name: 'Take' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Served 10');
+    // Not fired — inline confirm shown instead.
+    expect(overTake).not.toHaveBeenCalled();
+    expect(screen.getByText(/only 18 are waiting/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Take all 18' }));
+    expect(overTake).toHaveBeenCalledWith({ id: 'l1', count: 99 });
+    expect(await screen.findByRole('status')).toHaveTextContent('Served 18');
+  });
+
+  it('cancels an over-take without firing the mutation', async () => {
+    render(<WaitingListsView />);
+    await selectCreators();
+    await userEvent.type(screen.getByLabelText('Take'), '99');
+    await userEvent.click(screen.getByRole('button', { name: 'Take' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(takeTrigger).not.toHaveBeenCalled();
+    expect(screen.queryByText(/only 18 are waiting/)).toBeNull();
   });
 
   it('creates a list and makes it active', async () => {
