@@ -81,7 +81,8 @@ sequenceDiagram
   participant S as File store
 
   U->>UI: Add N creators (active list)
-  UI->>Q: trigger add mutation  Q->>API: POST /api/waiting-lists/:id/add { count: N }
+  UI->>Q: trigger add mutation
+  Q->>API: POST /api/waiting-lists/:id/add { count: N }
   API->>API: validate count (int ≥ 1)
   API->>S: mutate (acquire mutex → load)
   S->>D: add(list, N)
@@ -108,7 +109,8 @@ sequenceDiagram
   participant S as File store
 
   U->>UI: Take N creators (active list)
-  UI->>Q: trigger take mutation  Q->>API: POST /api/waiting-lists/:id/take { count: N }
+  UI->>Q: trigger take mutation
+  Q->>API: POST /api/waiting-lists/:id/take { count: N }
   API->>S: mutate (mutex → load)
   S->>D: take(list, N)
   D-->>S: { state, taken } (taken = min(N, total))
@@ -274,7 +276,6 @@ that would otherwise justify one.
 ```
 app/                     app-wide Redux wiring
   store.ts               configureStore: registers the api reducer + middleware
-  hooks.ts               typed useAppDispatch / useAppSelector
 api/                     RTK Query data layer
   baseApi.ts             createApi base: baseQuery, tagTypes, empty endpoints
   waitingLists/
@@ -306,7 +307,7 @@ components into screens. (`views/` replaces a generic `features/`; `pages/` or
 ```
 /shared                  shared TS contract (domain entities + API DTOs)
 /data                    JSON persistence (git-ignored)
-/docs                    architecture · tech-stack · domain-design · ai-usage + brief
+/docs                    architecture · tech-stack · domain-design · implementation + brief
 ```
 
 ## 10. Scope & future work
@@ -342,5 +343,5 @@ web UI. Everything below is a deliberate scoping choice.
 
 - **Libraries & tooling:** [`tech-stack.md`](./tech-stack.md)
 - **Domain model, algorithms, edge cases, API contract:** [`domain-design.md`](./domain-design.md)
-- **AI usage writeup:** [`ai-usage.md`](./ai-usage.md)
+- **AI usage writeup:** see the README "AI usage" section
 - **Brief:** [`take-home-description.md`](./take-home-description.md)
